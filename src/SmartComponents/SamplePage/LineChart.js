@@ -145,7 +145,6 @@ class LineChart extends Component {
     url = url + this.props.cluster + "/";
     const response = await fetch(url);
     const raw_data = await response.json();
-
     const data = raw_data.map(function(d) {
       return {
         DATE: parseTime(d.created), // format date string into DateTime object
@@ -164,7 +163,7 @@ class LineChart extends Component {
     y.domain([
       0,
       d3.max(data, function(d) {
-        return d.TOTAL + 10;
+        return d.TOTAL;
       })
     ]);
 
@@ -215,10 +214,10 @@ class LineChart extends Component {
       .call(
         d3
           .axisBottom(x)
-          .ticks()
+          .ticks(8)
           .tickSize(-height)
-          .tickFormat(d3.timeFormat("%b-%d"))
-      ) // "Jan-01"
+          .tickFormat(d3.timeFormat("%m/%d")) // "01/19"
+      )
       .selectAll("line")
       .attr("stroke", "#d7d7d7");
     // text label for the x axis

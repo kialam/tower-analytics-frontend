@@ -82,7 +82,6 @@ class BarChart extends Component {
     }
     const response = await fetch(url);
     const raw_data = await response.json();
-
     const data = raw_data.map(function(d) {
       return {
         DATE: parseTime(d.created), // format date string into DateTime object
@@ -91,7 +90,6 @@ class BarChart extends Component {
         TOTAL: +d.total
       };
     });
-
     // stack our data
     const stack = d3
       .stack()
