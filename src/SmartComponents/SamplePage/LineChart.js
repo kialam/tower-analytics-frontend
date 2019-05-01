@@ -216,6 +216,7 @@ class LineChart extends Component {
     svg
       .append("g")
       .attr("transform", "translate(0," + height + ")")
+      .classed("xAxis", true)
       .call(
         d3
           .axisBottom(x)
@@ -225,6 +226,7 @@ class LineChart extends Component {
       )
       .selectAll("line")
       .attr("stroke", "#d7d7d7");
+    svg.selectAll(".xAxis text").attr("y", "15");
     // text label for the x axis
     svg
       .append("text")

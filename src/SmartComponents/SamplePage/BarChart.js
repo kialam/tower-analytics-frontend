@@ -125,6 +125,7 @@ class BarChart extends Component {
     svg
       .append("g")
       .attr("transform", "translate(0," + height + ")")
+      .classed("xAxis", true)
       .call(
         d3
           .axisBottom(x)
@@ -134,6 +135,7 @@ class BarChart extends Component {
       )
       .selectAll("line")
       .attr("stroke", "#d7d7d7");
+    svg.selectAll(".xAxis text").attr("y", "10");
     // text label for the x axis
     svg
       .append("text")
