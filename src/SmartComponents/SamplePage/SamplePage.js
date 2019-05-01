@@ -22,10 +22,6 @@ import {
   DataList,
   DataListItem,
   DataListCell,
-  Dropdown,
-  DropdownToggle,
-  DropdownItem,
-  DropdownSeparator,
   FormSelect,
   FormSelectOption,
   Switch,
@@ -163,13 +159,12 @@ class SamplePage extends Component {
     const templatesData = await templateResponse.json();
     const notificationsUrl = this.getApiUrl("notifications");
     const notificationsResponse = await fetch(notificationsUrl);
-    const notificationsData = await notificationsResponse.json();
+    let notificationsData = await notificationsResponse.json();
     const clustersUrl = this.getApiUrl("clusters");
     const clustersResponse = await fetch(clustersUrl);
     const clustersData = await clustersResponse.json();
     this.setState({ modules: modulesData });
     this.setState({ templates: templatesData });
-    this.setState({ notifications: notificationsData });
     this.setState({ clusters: clustersData });
     var rightOptions = this.state.rightOptions;
     var i = 0;
@@ -180,6 +175,30 @@ class SamplePage extends Component {
       });
     }
     this.setState({ rightOptions: rightOptions });
+
+    const mockNotificationsAddendum = [
+      {
+        date: "2019-04-30T15:06:40.995",
+        label: "message",
+        message: "Regular message number 1",
+        notification_id: 2,
+        notification_severity_id: 2,
+        notification_type_id: 2,
+        tenant_id: 4
+      },
+      {
+        date: "2019-04-30T15:07:40.995",
+        label: "message",
+        message: "Regular message number 2",
+        notification_id: 3,
+        notification_severity_id: 2,
+        notification_type_id: 2,
+        tenant_id: 5
+      }
+    ];
+
+    notificationsData = notificationsData.concat(mockNotificationsAddendum);
+    this.setState({ notifications: notificationsData });
   }
 
   getApiUrl(name) {
@@ -195,6 +214,7 @@ class SamplePage extends Component {
       isModalOpen: false,
       leftValue: "past week",
       rightValue: "all clusters",
+      notificationValue: "all",
       isAccessible: false,
       modules: [],
       templates: [],
@@ -223,6 +243,9 @@ class SamplePage extends Component {
     this.rightChange = (value, event) => {
       this.setState({ rightValue: value });
     };
+    this.notificationChange = (value, event) => {
+      this.setState({ notificationValue: value });
+    };
     this.handleToggle = isAccessible => {
       this.setState({ isAccessible });
     };
@@ -232,16 +255,14 @@ class SamplePage extends Component {
       { value: "past 2 weeks", label: "Past 2 Weeks", disabled: false },
       { value: "past month", label: "Past Month", disabled: false }
     ];
-    this.dropdownItems = [
-      <DropdownItem key="danger" component="button">
-        View Danger
-      </DropdownItem>,
-      <DropdownItem key="warning" component="button">
-        View Warning
-      </DropdownItem>,
-      <DropdownItem key="all" component="button">
-        View All
-      </DropdownItem>
+    this.notificationOptions = [
+      {
+        value: "please choose",
+        label: "Select Notification Type",
+        disabled: true
+      },
+      { value: "error", label: "View Danger", disabled: false },
+      { value: "all", label: "View All", disabled: false }
     ];
   }
 
@@ -277,7 +298,8 @@ class SamplePage extends Component {
       modalTemplate,
       modalData,
       rightValue,
-      isRightOpen
+      notificationValue,
+      notifications
     } = this.state;
 
     const dataListCellStyle = {
@@ -331,28 +353,42 @@ class SamplePage extends Component {
     }
 
     var notification_colors = { error: "#db524b", warning: "#f0ad37", "": "" };
-    var notifications = [];
-    for (i = 0; i < this.state.notifications.length; i++) {
-      notifications.push(
-        <DataListItem aria-labelledby="simple-item1">
-          <DataListCell>
-            <span>
-              {this.state.notifications[i].label == "error" ||
-              this.state.notifications[i].label == "warning" ? (
-                <WarningTriangleIcon
-                  style={{
-                    color:
-                      notification_colors[this.state.notifications[i].label],
-                    marginRight: "5px"
-                  }}
-                />
-              ) : null}
-              {this.state.notifications[i].message}
-            </span>
-          </DataListCell>
-        </DataListItem>
-      );
-    }
+    const notificationTemplate = notifications.map(notification => (
+      <DataListItem aria-labelledby="simple-item1">
+        <DataListCell>
+          <span>
+            {notification.label == "error" ||
+            notification.label == "warning" ? (
+              <WarningTriangleIcon
+                style={{
+                  color: notification_colors[notification.label],
+                  marginRight: "5px"
+                }}
+              />
+            ) : null}
+            {notification.message}
+          </span>
+        </DataListCell>
+      </DataListItem>
+    ));
+    const errorNotifications = notifications.filter(
+      notification => notification.label === "error"
+    );
+    const errorNotificationTemplate = errorNotifications.map(notification => (
+      <DataListItem aria-labelledby="simple-item1">
+        <DataListCell>
+          <span>
+            <WarningTriangleIcon
+              style={{
+                color: notification_colors[notification.label],
+                marginRight: "5px"
+              }}
+            />
+            {notification.message}
+          </span>
+        </DataListCell>
+      </DataListItem>
+    ));
 
     return (
       <React.Fragment>
@@ -480,23 +516,26 @@ class SamplePage extends Component {
                   <h3>Notifications</h3>
                 </DataListCell>
                 <DataListCell style={dataListCellStyle}>
-                  <Dropdown
-                    style={{
-                      border: "1px solid #ededed",
-                      borderBottomColor: "#282d33"
-                    }}
-                    onSelect={this.onRightSelect}
-                    toggle={
-                      <DropdownToggle onToggle={this.onRightToggle}>
-                        View All
-                      </DropdownToggle>
-                    }
-                    isOpen={isRightOpen}
-                    dropdownItems={this.dropdownItems}
-                  />
+                  <FormSelect
+                    value={this.state.notificationValue}
+                    onChange={this.notificationChange}
+                    aria-label="Select Notification Type"
+                    style={{ margin: "2px 10px" }}
+                  >
+                    {this.notificationOptions.map((option, index) => (
+                      <FormSelectOption
+                        isDisabled={option.disabled}
+                        key={index}
+                        value={option.value}
+                        label={option.label}
+                      />
+                    ))}
+                  </FormSelect>
                 </DataListCell>
               </DataListItem>
-              {notifications}
+              {/* NOTIFICATIONS */}
+              {notificationValue === "all" && notificationTemplate}
+              {notificationValue === "error" && errorNotificationTemplate}
             </DataList>
           </div>
           <TemplateModal
