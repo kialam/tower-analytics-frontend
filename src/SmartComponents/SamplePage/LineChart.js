@@ -27,6 +27,7 @@ class LineChart extends Component {
   }
 
   async init() {
+    document.getElementById("spinny").style.display = "block";
     // Clear our chart container element first
     d3.selectAll("#d3-chart-root > *").remove();
     const width =
@@ -158,7 +159,7 @@ class LineChart extends Component {
         TOTAL: +d.total
       };
     });
-
+    document.getElementById("spinny").style.display = "none";
     // Scale the range of the data
     x.domain(
       d3.extent(data, function(d) {
@@ -220,7 +221,7 @@ class LineChart extends Component {
       .call(
         d3
           .axisBottom(x)
-          .ticks(8)
+          .ticks()
           .tickSize(-height)
           .tickFormat(d3.timeFormat("%m/%d")) // "01/19"
       )
@@ -301,6 +302,7 @@ class LineChart extends Component {
 
   async componentDidMount() {
     await this.init();
+    document.getElementById("spinny").style.display = "none";
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {

@@ -27,10 +27,13 @@ class BarChart extends Component {
   }
 
   async componentDidMount() {
-    this.init();
+    await this.init();
+    document.getElementById("spinny").style.display = "none";
   }
 
   async init() {
+    // d3.select('#spinny').show();
+    document.getElementById("spinny").style.display = "block";
     // Clear our chart container element first
     d3.selectAll("#" + this.props.id + " > *").remove();
     const width =
@@ -82,6 +85,8 @@ class BarChart extends Component {
     }
     const response = await fetch(url);
     const raw_data = await response.json();
+    this.setState({ data: raw_data });
+    document.getElementById("spinny").style.display = "none";
     const data = raw_data.map(function(d) {
       return {
         DATE: parseTime(d.created), // format date string into DateTime object
